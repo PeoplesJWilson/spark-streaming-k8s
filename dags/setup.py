@@ -8,8 +8,6 @@ from airflow.operators.dummy_operator import DummyOperator
 from kafka.admin import KafkaAdminClient, NewTopic
 from airflow import DAG
 import sys
-# add dag folder to path so environment can be imported 
-sys.path.append("/opt/bitnami/airflow/dags/git_streaming-pipeline-dag")
 
 # User configured variables from environment.py
 TOPICS = environment.TOPICS
