@@ -7,8 +7,9 @@ from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from kafka.admin import KafkaAdminClient, NewTopic
 from airflow import DAG
+import sys
 
-
+sys.path.append("/opt/bitnami/airflow/dags/git_streaming-pipeline-dags/dags")
 
 # User configured variables from environment.py
 TOPICS = environment.TOPICS
