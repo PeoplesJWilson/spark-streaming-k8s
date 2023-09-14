@@ -4,6 +4,9 @@ from airflow import DAG
 
 import pendulum
 import os
+import sys
+# add dag folder to path so environment can be imported 
+sys.path.append("/opt/bitnami/airflow/dags/git_streaming-pipeline-dags")
 
 # topics to stream from --> connection {{spark_conn_name}} already created in setup_dag
 import environment
