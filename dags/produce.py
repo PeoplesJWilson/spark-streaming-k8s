@@ -10,10 +10,6 @@ from airflow import DAG
 
 from kafka import KafkaProducer
 from twelvedata import TDClient
-import sys
-
-# add dag folder to path so environment can be imported 
-sys.path.append("/opt/bitnami/airflow/dags/git_streaming-pipeline-dag")
 
 # passed to tasks
 import environment
