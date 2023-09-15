@@ -4,13 +4,15 @@ from airflow import DAG
 
 import pendulum
 import os
-import sys
+
 
 # topics to stream from --> connection {{spark_conn_name}} already created in setup_dag
-import environment
-spark_conn_name = environment.spark_conn_name
-TOPICS = environment.TOPICS
-scala_dependencies = environment.scala_dependencies
+
+spark_conn_name = os.environ["spark_conn_name"]
+env_vars = list(os.environ)
+TOPICS = [topic for topic in env_vars if topic.startswith('TOPIC')]
+
+scala_dependencies = [depend for depend in env_vars if depend.startswith('scala_dependency')]
 scala_dependencies = ",".join(scala_dependencies)   #formatting for SparkSubmitOperator
 
 # Ports --> passed to scala application 
