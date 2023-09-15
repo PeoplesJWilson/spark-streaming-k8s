@@ -10,7 +10,7 @@ from airflow import DAG
 # passed to tasks
 env_vars = list(os.environ)
 
-TOPICS = [topic for topic in env_vars if topic.startswith('TOPIC')]
+TOPICS = [os.environ[topic] for topic in env_vars if topic.startswith('TOPIC')]
 spark_conn_name = os.environ["spark_conn_name"]
 
 # Global variables --> If configured, must be changed in docker-compose
