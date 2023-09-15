@@ -12,10 +12,10 @@ from kafka import KafkaProducer
 from twelvedata import TDClient
 
 # passed to tasks
-import environment
-SYMBOLS = environment.SYMBOLS
-TOPICS = environment.TOPICS
-N_SAMPLES = environment.N_SAMPLES
+env_vars = list(os.environ)
+SYMBOLS = [symbol for symbol in env_vars if symbol.startswith('SYMBOL')]
+TOPICS = [topic for topic in env_vars if topic.startswith('TOPIC')]
+N_SAMPLES = int(os.environ["N_SAMPLES"])
 
 # global
 API_KEY = os.environ["TWELVE_DATA_KEY"]     # sensitive - comes from .local.env 
