@@ -1,17 +1,17 @@
 import pendulum
 import os
-import environment
 
 from airflow.decorators import task
 from airflow.operators.bash_operator import BashOperator
 from airflow.operators.dummy_operator import DummyOperator
 from kafka.admin import KafkaAdminClient, NewTopic
 from airflow import DAG
-import sys
 
-# User configured variables from environment.py
-TOPICS = environment.TOPICS
-spark_conn_name = environment.spark_conn_name
+# passed to tasks
+env_vars = list(os.environ)
+
+TOPICS = [topic for topic in env_vars if topic.startswith('TOPIC')]
+spark_conn_name = os.environ["spark_conn_name"]
 
 # Global variables --> If configured, must be changed in docker-compose
 KAFKA_SERVER_PORT = os.environ["KAFKA_SERVER_PORT"]
