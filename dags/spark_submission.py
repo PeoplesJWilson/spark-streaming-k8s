@@ -10,7 +10,7 @@ import os
 
 spark_conn_name = os.environ["spark_conn_name"]
 env_vars = list(os.environ)
-TOPICS = [topic for topic in env_vars if topic.startswith('TOPIC')]
+TOPICS = [os.environ[topic] for topic in env_vars if topic.startswith('TOPIC')]
 
 scala_dependencies = [depend for depend in env_vars if depend.startswith('scala_dependency')]
 scala_dependencies = ",".join(scala_dependencies)   #formatting for SparkSubmitOperator
