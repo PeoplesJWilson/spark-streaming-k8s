@@ -24,7 +24,6 @@ MONGO_DBNAME = os.environ["MONGO_DBNAME"]
 # dag definition
 default_args = {
     'owner': 'PeoplesJWilson',
-    'catchup': False,
     'schedule_interval': '20 1 * * *', 
 }
 
@@ -33,6 +32,7 @@ dag = DAG(
     start_date=pendulum.datetime(year=2023, month=9, day=7, tz="UTC"),
     default_args=default_args,
     description='Your DAG description',
+    catchup=False
 )
 
 # dag architecture 
