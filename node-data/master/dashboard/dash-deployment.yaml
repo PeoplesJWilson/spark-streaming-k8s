@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    service: dash
+  name: dash
+  namespace: default
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      service: dash
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        service: dash
+    spec:
+      containers:
+        - env:
+          - name: MONGO_DBNAME
+            value: stonks
+          - name: MONGO_SERVER_PORT
+            value: mongo:27017
+          image: peoplesjwilson/streaming-pipeline:dash-app
+          name: dash-app
+          ports:
+            - containerPort: 8000
+              hostPort: 8000
+              protocol: TCP
+          resources: {}
+      restartPolicy: Always
+status: {}
