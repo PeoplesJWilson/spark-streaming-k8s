@@ -44,7 +44,7 @@ for topic in TOPICS:
     task_id = f"spark_submit_{topic}_job"
 
     spark_job = SparkSubmitOperator(
-        application="/opt/airflow/dags/kafka-streaming_2.12-2.0.jar",
+        application="/opt/bitnami/airflow/dags/git_streaming-pipeline-dags/kafka-streaming_2.12-2.0.jar",
         conf={"spark.yarn.submit.waitAppCompletion": False},
         conn_id=spark_conn_name, 
         task_id=task_id,
