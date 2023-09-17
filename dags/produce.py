@@ -161,8 +161,9 @@ def produce_dag():
 
 
         minute_last = datetime.datetime.now().replace(second=0).replace(microsecond=0) - datetime.timedelta(minutes=1)
-        for i in range(N_SAMPLES):
-            print(f"Number {i} out of {N_SAMPLES}")
+        lastSeven = []
+        for N_Sample in range(N_SAMPLES):
+            print(f"Number {N_Sample} out of {N_SAMPLES}")
 
 
             # avoid collected duplicates by waiting long enough
@@ -215,9 +216,27 @@ def produce_dag():
 
                     next_ema = float(datum[key])
                     new_ema_starts.append((next_ema,alpha,N))
-            
 
                 ema_data[symbol] = new_ema_starts   # tracking state ... update ema data for next minute
+
+                datum["support"] = '0'
+                datum["resistance"] = '0'
+                if N_Sample < 7:
+                    lastSeven.append(datum)
+                else:
+                    lastSeven.append(datum)
+                    lastSeven = lastSeven[-7:]
+                    highs = [float(item["high"]) for item in last_7]
+                    lows = [float(item["low"]) for item in last_7]
+    
+                    if highs.index(max(highs)) == 4:
+                        datum["resistance"] =  datum["high"]
+                    
+                    if lows.index(min(lows)) == 4:
+                        datum["support"] = datum["low"]
+            
+
+                
 
                 print(f"python output:{datum}")
                 print("sending to kafka")
