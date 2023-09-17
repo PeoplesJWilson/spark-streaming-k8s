@@ -26,7 +26,7 @@ default_args = {
 
 dag = DAG(
     'setup_dag',
-    start_date=pendulum.datetime(year=2023, month=9, day=7, tz="UTC"),
+    start_date=pendulum.datetime(year=2023, month=9, day=15, tz="UTC"),
     default_args=default_args,
     description='This dag creates kafka topics, and initializes a connection to the spark master',
     catchup=False,
