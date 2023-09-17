@@ -234,7 +234,7 @@ def produce_dag():
     start = DummyOperator(task_id="start")
     end = DummyOperator(task_id="end")
 
-    ema_starting_data = ema_warmstart([15,20,30], SYMBOLS, TOPICS)
+    ema_starting_data = warmstart([12,16,30], SYMBOLS, TOPICS)
     produce_to_topics = produce(ema_starting_data, SYMBOLS, TOPICS)
 
     start >> ema_starting_data >> produce_to_topics >> end
