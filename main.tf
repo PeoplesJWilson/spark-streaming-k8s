@@ -142,3 +142,65 @@ module "workerNodeTwo" {
     depends_on = [module.masterNode]
 
 }
+module "workerNodeThree" {
+    source = "./modules/k8s-node"
+
+    node_name = "worker-node-3"
+    bucket_name = module.joinBucket.s3_bucket_name
+    join_command_filename = "join-command.sh"
+
+    instance_type = "t2.medium"
+    security_group_id = aws_security_group.worker_sg.id
+
+    subnet_id = module.networking.public_subnet
+    instance_profile_name = module.s3Full.instance_profile_name
+
+    path_to_node_data = "node-data/worker"
+    path_to_bootstrap_template = "node-data/worker/bootstrap_template.sh"
+    path_to_bootstrap = "node-data/worker/bootstrap.sh"
+
+    depends_on = [module.masterNode]
+
+}
+
+
+module "workerNodeFour" {
+    source = "./modules/k8s-node"
+
+    node_name = "worker-node-4"
+    bucket_name = module.joinBucket.s3_bucket_name
+    join_command_filename = "join-command.sh"
+
+    instance_type = "t2.micro"
+    security_group_id = aws_security_group.worker_sg.id
+
+    subnet_id = module.networking.public_subnet
+    instance_profile_name = module.s3Full.instance_profile_name
+
+    path_to_node_data = "node-data/worker"
+    path_to_bootstrap_template = "node-data/worker/bootstrap_template.sh"
+    path_to_bootstrap = "node-data/worker/bootstrap.sh"
+
+    depends_on = [module.masterNode]
+
+}
+module "workerNodeFive" {
+    source = "./modules/k8s-node"
+
+    node_name = "worker-node-5"
+    bucket_name = module.joinBucket.s3_bucket_name
+    join_command_filename = "join-command.sh"
+
+    instance_type = "t2.micro"
+    security_group_id = aws_security_group.worker_sg.id
+
+    subnet_id = module.networking.public_subnet
+    instance_profile_name = module.s3Full.instance_profile_name
+
+    path_to_node_data = "node-data/worker"
+    path_to_bootstrap_template = "node-data/worker/bootstrap_template.sh"
+    path_to_bootstrap = "node-data/worker/bootstrap.sh"
+
+    depends_on = [module.masterNode]
+
+}
