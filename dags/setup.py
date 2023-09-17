@@ -21,7 +21,6 @@ SPARK_MASTER_SERVER_PORT = os.environ["SPARK_MASTER_SERVER_PORT"]
 # dag definition
 default_args = {
     'owner': 'PeoplesJWilson',
-    'catchup': False,
     'schedule_interval': '10 1 * * *', 
 }
 
@@ -30,6 +29,7 @@ dag = DAG(
     start_date=pendulum.datetime(year=2023, month=9, day=7, tz="UTC"),
     default_args=default_args,
     description='This dag creates kafka topics, and initializes a connection to the spark master',
+    catchup=False,
 )
 
 # tasks
