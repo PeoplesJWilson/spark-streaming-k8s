@@ -48,7 +48,7 @@ dag = DAG(
 def produce_dag():
     # tasks
     @task()
-    def ema_warmstart(Ns, SYMBOLS, TOPICS, production = False):
+    def warmstart(Ns, SYMBOLS, TOPICS, output_num = 2000, production = False):
         producer = KafkaProducer(bootstrap_servers = [KAFKA_SERVER_PORT],
                                 value_serializer = lambda x: json.dumps(x).encode('utf-8'),
                                 api_version = (0,10,2))
@@ -59,7 +59,7 @@ def produce_dag():
         symbols = ",".join(SYMBOLS)
         max_N = max(Ns)
         # initial warm startup
-        ts = td.time_series(symbol=symbols, interval="1min", outputsize=5*max_N)
+        ts = td.time_series(symbol=symbols, interval="1min", outputsize=output_num)
         json_data = ts.as_json()
         if len(SYMBOLS) == 1:
             json_data = {SYMBOLS[0]: json_data}
@@ -89,7 +89,44 @@ def produce_dag():
 
                 ema_starts.append((ema, alpha, N))
             
+            # compute macd data, estimate support and resistance
+            ema_long = f"ema_{max(Ns)}" 
+            ema_short = f"ema_{min(Ns)}" 
+            alpha = 2/(9 + 1)
+            alpha_200 = 2/(200 + 1)
+    
+            signal = float(processed_data[0][ema_short]) - float(processed_data[0][ema_long])
+            ema_200 = float(processed_data[0]["close"])
+            for index,datum in enumerate(data):
+                macd = float(processed_data[index][ema_short]) - float(processed_data[index][ema_long])
+                signal = alpha*float(macd) + (1-alpha)*signal
+    
+                ema_200 = alpha_200*float(processed_data[index]["close"]) + (1-alpha_200)*ema_200
+    
+                processed_data[index]["ema_200"] = str(ema_200) 
+                processed_data[index]["macd"] = str(macd)
+                processed_data[index]["signal"] = str(signal)
+                
+                processed_data[index]["support"] = '0'
+                processed_data[index]["resistance"] = '0'
+    
+                if index > 7:
+                    last_7 = processed_data[index-6:index+1]
+                    highs = [datum["high"] for datum in last_7]
+                    lows = [datum["low"] for datum in last_7]
+    
+                    if highs.index(max(highs)) == 4:
+                        processed_data[index]["resistance"] =  processed_data[index]["high"]
+                    
+                    if lows.index(min(lows)) == 4:
+                        processed_data[index]["support"] =  processed_data[index]["low"]
+                        
+            ema_starts.append((ema_200, alpha_200, 200))
+            ema_starts.append((signal, alpha, 9))
+            
             ema_data[symbol] = ema_starts 
+            
+            # now all data is processed. send to producer
             for datum in processed_data:  
                 producer.send(topic, value=datum)
         
@@ -159,12 +196,22 @@ def produce_dag():
 
                 ema_starts = ema_data[symbol]   # ema tuple to update ... 
             
-
+                Ns = [N for (ema, alpha, N) in ema_starts]
+                Ns = Ns[:-2]
+                ema_short = f"ema_{min(Ns)}"
+                ema_long = f"ema_{max(Ns)}"
                 # compute the next EMA for each N
                 new_ema_starts = []
-                for (ema, alpha, N) in ema_starts:
-                    key = f"ema_{N}"
-                    datum[key] = str(alpha*float(datum["close"]) + (1-alpha)*ema)    # processed data ( with EMAs)
+                num_emas = len(ema_starts)
+                for index,(ema, alpha, N) in enumerate(ema_starts):
+                    if index == (num_emas - 1):
+                        key = "signal"
+                        macd = float(datum[ema_short]) - float(datum[ema_long])
+                        datum["macd"] = macd
+                        datum[key] = alpha*float(macd) + (1-alpha)*ema
+                    else:
+                        key = f"ema_{N}"
+                        datum[key] = str(alpha*float(datum["close"]) + (1-alpha)*ema)    # processed data ( with EMAs)
 
                     next_ema = float(datum[key])
                     new_ema_starts.append((next_ema,alpha,N))
