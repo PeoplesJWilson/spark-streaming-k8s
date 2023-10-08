@@ -61,6 +61,11 @@ This project automatically scales to stream data from any number of stock symbol
 Currently, a Kubernetes manifest is generated to create a single worker spark cluster for each symbol. An alternative approach is to change only the number of worker nodes, and maintain a single spark cluster. This may be preferred, and can be accomplished with minor modifications to the terraform module __spark-templating__.  
 
 ## Reproducibility
+
+### Prerequisites
+- An aws account with properly configured credentials
+- Terraform installed locally on your machine
+
 ### Setting Up the Kubernetes Cluster
 - Step 0 to reproducing is to obtain your own API key from [twelvedata](https://twelvedata.com). Follow the instructions on their website to obtain your own API key. Then, clone this repo and replace __twelve_data_key__ in __locals.tf__ with your api key (as a string).
 - Run `terraform init && terraform apply -auto-approve`
