@@ -2,3 +2,9 @@ secrets/keys
 .metals
 .vscode
 .terraform
+terraform.tfstate
+terraform.tfstate.backup
+.terraform.lock.hcl
+scala-app/project
+scala-app/target
+.scala-build

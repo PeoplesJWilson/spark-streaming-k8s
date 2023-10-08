@@ -3,23 +3,23 @@ kind: Deployment
 metadata:
   annotations:
   labels:
-    service: kafka
-  name: kafka
+    service: broker
+  name: broker
   namespace: default
 spec:
   replicas: 1
   selector:
     matchLabels:
-      service: kafka
+      service: broker
   template:
     metadata:
       labels:
-        service: kafka
+        service: broker
     spec:
       containers:
         - env:
             - name: KAFKA_ADVERTISED_LISTENERS
-              value: PLAINTEXT://kafka:29092,PLAINTEXT_HOST://localhost:9092
+              value: PLAINTEXT://broker:29092,PLAINTEXT_HOST://localhost:9092
             - name: KAFKA_BROKER_ID
               value: "1"
             - name: KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS
@@ -50,7 +50,10 @@ spec:
             - containerPort: 9101
               hostPort: 9101
               protocol: TCP
-          resources: {}
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "1000m"
       hostname: broker
       restartPolicy: Always
 status: {}

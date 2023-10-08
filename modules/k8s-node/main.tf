@@ -60,6 +60,10 @@ resource "aws_instance" "node" {
 
   user_data = data.template_file.bootstrap_template.rendered
 
+  root_block_device {
+    volume_size = var.root_volume_size
+  }
+
   provisioner "file" {
     source      = var.path_to_node_data
     destination = "/home/ubuntu"

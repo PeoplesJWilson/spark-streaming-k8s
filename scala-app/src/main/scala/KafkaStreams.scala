@@ -43,6 +43,7 @@ object KafkaStreams {
       .format("kafka")
       .option("kafka.bootstrap.servers", kafkaServerPort)
       .option("subscribe", kafkaTopic)
+      .option("failOnDataLoss", false)
       .load()
 
     val parsedLines = lines

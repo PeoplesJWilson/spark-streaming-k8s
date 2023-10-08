@@ -24,13 +24,10 @@ spec:
             - containerPort: 27017
               hostPort: 27017
               protocol: TCP
-          resources: {}
-          volumeMounts:
-            - mountPath: /data/db
-              name: mongo
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "50m"
+              ephemeral-storage: "4096Mi"
       restartPolicy: Always
-      volumes:
-        - name: mongo
-          persistentVolumeClaim:
-            claimName: mongo
 status: {}

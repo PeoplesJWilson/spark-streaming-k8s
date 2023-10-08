@@ -89,4 +89,12 @@ check_error "Failed to generate and save join command for worker nodes"
 aws s3 cp "${JOIN_COMMAND_FILE}" "$S3_PATH"
 check_error "Failed to upload join-command.txt to S3"
 
+# Install helm
+curl -fsSL -o get_helm.sh https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+chmod 700 get_helm.sh
+./get_helm.sh
+
+# add bitnami airflow repo
+helm repo add bitnami https://charts.bitnami.com/bitnami
+
 echo "Kubernetes setup completed successfully."

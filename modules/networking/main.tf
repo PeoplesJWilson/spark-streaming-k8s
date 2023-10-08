@@ -6,72 +6,47 @@ resource "aws_vpc" "vpc" {
   enable_dns_support   = true
 }
 
-resource "aws_subnet" "public_subnet" {
+resource "aws_subnet" "public_subnet_1" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.public_subnet_cidr
+  cidr_block              = var.public_subnet_1_cidr
   availability_zone       = "us-east-2a"
   map_public_ip_on_launch = true
 }
 
-resource "aws_subnet" "private_subnet_1" {
+resource "aws_subnet" "public_subnet_2" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.private_subnet_1_cidr
+  cidr_block              = var.public_subnet_2_cidr
   availability_zone       = "us-east-2b"
-  map_public_ip_on_launch = false
+  map_public_ip_on_launch = true
 }
 
-resource "aws_subnet" "private_subnet_2" {
+resource "aws_subnet" "public_subnet_3" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = var.private_subnet_2_cidr
+  cidr_block              = var.public_subnet_3_cidr
   availability_zone       = "us-east-2c"
-  map_public_ip_on_launch = false
-}
-
-resource "aws_db_subnet_group" "private_subnet_group" {
-  name       = "private subnet group"
-  subnet_ids = [aws_subnet.private_subnet_1.id, aws_subnet.private_subnet_2.id]
-  
+  map_public_ip_on_launch = true
 }
 #__________________________________________________
+# subnet group(s) for rds, elasti-cache
 
-# Setup igw, and nat gateway
+resource "aws_db_subnet_group" "rds_subnet_group" {
+  name       = "rds_subnet_group"
+  subnet_ids = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id, aws_subnet.public_subnet_3.id]
+}
+
+resource "aws_elasticache_subnet_group" "cache_subnet_group" {
+  name       = "cache-subnet-group"
+  subnet_ids = [aws_subnet.public_subnet_1.id, aws_subnet.public_subnet_2.id, aws_subnet.public_subnet_3.id]
+}
+
+
+
+# Setup igw
 resource "aws_internet_gateway" "ig" {
   vpc_id = aws_vpc.vpc.id
 }
 
-resource "aws_eip" "nat_eip" {
-  domain = "vpc"
-  depends_on = [aws_internet_gateway.ig]
-}
-
-resource "aws_nat_gateway" "nat" {
-  allocation_id = aws_eip.nat_eip.id
-  subnet_id     = aws_subnet.public_subnet.id
-  depends_on    = [aws_internet_gateway.ig]
-}
 #______________________________________________________
-
-# Configure private routing
-resource "aws_route_table" "private" {
-  vpc_id = aws_vpc.vpc.id
-}
-
-resource "aws_route" "private_nat_gateway" {
-  route_table_id         = aws_route_table.private.id
-  destination_cidr_block = "0.0.0.0/0"
-  nat_gateway_id         = aws_nat_gateway.nat.id
-}
-
-resource "aws_route_table_association" "private_1" {
-  subnet_id      = aws_subnet.private_subnet_1.id
-  route_table_id = aws_route_table.private.id
-}
-
-resource "aws_route_table_association" "private_2" {
-  subnet_id      = aws_subnet.private_subnet_2.id
-  route_table_id = aws_route_table.private.id
-}
-#_______________________________________________________
 
 # Configure public routing
 resource "aws_route_table" "public" {
@@ -84,10 +59,19 @@ resource "aws_route" "public_internet_gateway" {
   gateway_id             = aws_internet_gateway.ig.id
 }
 
-resource "aws_route_table_association" "public" {
-  subnet_id      = aws_subnet.public_subnet.id
+resource "aws_route_table_association" "public_1_association" {
+  subnet_id      = aws_subnet.public_subnet_1.id
   route_table_id = aws_route_table.public.id
 }
+resource "aws_route_table_association" "public_2_association" {
+  subnet_id      = aws_subnet.public_subnet_2.id
+  route_table_id = aws_route_table.public.id
+}
+resource "aws_route_table_association" "public_3_association" {
+  subnet_id      = aws_subnet.public_subnet_3.id
+  route_table_id = aws_route_table.public.id
+}
+
 #___________________________________________________________
 
 # Put default security group on VPC

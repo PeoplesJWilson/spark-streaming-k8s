@@ -1,42 +1,40 @@
 # Don't use a shebang here  !/bin/bash
+kubectl apply -f rbac.yaml
 
 cd kafka
 kubectl apply -f zookeeper-deployment.yaml
 kubectl apply -f zookeeper-service.yaml 
+kubectl rollout status deployment/zookeeper
 
-echo "... sleeping for two minutes while zookeeper starts up ..."
-sleep 120
-
-kubectl apply -f kafka-deployment.yaml
-kubectl apply -f kafka-service.yaml
-echo "... sleeping for two minutes while bootstrap server kafka starts up ..."
-sleep 120 
+kubectl apply -f broker-deployment.yaml
+kubectl apply -f broker-service.yaml
+kubectl rollout status deployment/broker
 cd ..
 
 
 cd mongo
-kubectl apply -f . 
+kubectl apply -f .
+kubectl rollout status deployment/mongo 
 cd ..
 
 
 cd spark
-kubectl apply -f spark-deployment.yaml 
-kubectl apply -f spark-worker-deployment.yaml 
-kubectl apply -f spark-service.yaml
-echo "... sleeping for two minutes while the spark master starts up"
-sleep 120
+kubectl apply -f .
+kubectl rollout status deployment/spark-master-0
 cd ..
 
 
-cd dashboard
-kubectl apply -f . -n dashboard
-cd ..
+sleep 10
 
-kubectl create namespace airflow
 cd airflow
+helm repo add bitnami https://charts.bitnami.com/bitnami
+helm repo update
 helm install airflow-streaming bitnami/airflow -f values.yaml
 cd ..
 
-#kubectl port-forward svc/dash 8000:8000
-#kubectl port-forward --namespace default svc/airflow-streaming 8080:8080 &
-#echo "Airflow URL: http://127.0.0.1:8080" 
+kubectl rollout status deployment/airflow-streaming-scheduler
+kubectl rollout status deployment/airflow-streaming-web
+
+kubectl port-forward --namespace default --address 0.0.0.0 svc/airflow-streaming 8080:8080 &
+# kubectl port-forward --address 0.0.0.0 svc/dash 8050:8050 &
+

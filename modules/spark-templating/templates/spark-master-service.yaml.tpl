@@ -2,8 +2,8 @@ apiVersion: v1
 kind: Service
 metadata:
   labels:
-    service: spark
-  name: spark
+    service: ${spark_master_name}
+  name: ${spark_master_name}
   namespace: default
 spec:
   ports:
@@ -14,6 +14,6 @@ spec:
       port: 7077
       targetPort: 7077
   selector:
-    service: spark
+    service: ${spark_master_name}
 status:
   loadBalancer: {}

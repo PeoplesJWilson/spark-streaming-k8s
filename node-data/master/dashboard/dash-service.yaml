@@ -7,9 +7,9 @@ metadata:
   namespace: default
 spec:
   ports:
-    - name: "8000"
-      port: 8000
-      targetPort: 8000
+    - name: "8050"
+      port: 8050
+      targetPort: 8050
   selector:
     service: dash
 status:

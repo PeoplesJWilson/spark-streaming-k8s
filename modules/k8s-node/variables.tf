@@ -49,4 +49,8 @@ variable "path_to_bootstrap" {
   type        = string
 }
 
+variable "root_volume_size" {
+  description = "size (in GB) of root volume for node"
+  type        = number
+}
 

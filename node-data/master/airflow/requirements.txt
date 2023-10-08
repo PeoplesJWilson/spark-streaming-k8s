@@ -1,4 +1,5 @@
 twelvedata
 kafka-python
 pendulum
+kubernetes
 apache-airflow-providers-apache-spark

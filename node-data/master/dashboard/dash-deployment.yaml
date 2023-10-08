@@ -25,9 +25,12 @@ spec:
           image: peoplesjwilson/streaming-pipeline:dash-app
           name: dash-app
           ports:
-            - containerPort: 8000
-              hostPort: 8000
+            - containerPort: 8050
+              hostPort: 8050
               protocol: TCP
-          resources: {}
+          resources:
+            requests:
+              memory: "1024Mi"
+              cpu: "1000m"
       restartPolicy: Always
 status: {}

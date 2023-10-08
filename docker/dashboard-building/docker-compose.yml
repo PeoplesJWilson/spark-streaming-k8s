@@ -1,0 +1,7 @@
+services:  
+  dash:
+    container_name: dash_app
+    build: .
+    ports:
+      - 8050:8050
+  

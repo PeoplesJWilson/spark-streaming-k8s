@@ -1,0 +1,26 @@
+# ClusterRole that allows listing pods and running exec
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: python-pod-role
+rules:
+- apiGroups: [""]
+  resources: ["pods"]
+  verbs: ["list"]
+- apiGroups: [""]
+  resources: ["pods/exec"]
+  verbs: ["create", "get", "list"]
+---
+# ClusterRoleBinding to bind the ClusterRole to the service account
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRoleBinding
+metadata:
+  name: python-pod-role-binding
+subjects:
+- kind: ServiceAccount
+  name: default  # You can replace this with the actual service account name if not using the default
+  namespace: default  # You can replace this with the namespace where your pods are running
+roleRef:
+  kind: ClusterRole
+  name: python-pod-role
+  apiGroup: rbac.authorization.k8s.io

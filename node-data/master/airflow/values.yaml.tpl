@@ -49,10 +49,10 @@ diagnosticMode:
 auth:
   ## @param auth.username Username to access web UI
   ##
-  username: peoplesjwilson
+  username: "${airflow_username}"
   ## @param auth.password Password to access web UI
   ##
-  password: "123notmypassword456dontworry"
+  password: "${airflow_password}"
   ## @param auth.fernetKey Fernet key to secure connections
   ## ref: https://airflow.readthedocs.io/en/stable/howto/secure-connections.html
   ## ref: https://bcb.github.io/airflow/fernet-key
@@ -119,18 +119,10 @@ dags:
 ## @param extraEnvVars Add extra environment variables for all the Airflow pods
 ##
 extraEnvVars:
-  - name: TOPIC_1
-    value: "msft"
-  - name: SYMBOL_1
-    value: "MSFT"
-  - name: TOPIC_2
-    value: "aapl"
-  - name: SYMBOL_2
-    value: "AAPL"
+  - name: TWELVE_DATA_KEY
+    value: "${twelve_data_key}"
   - name: N_SAMPLES
-    value: "5"
-  - name: spark_conn_name 
-    value: "spark_default"
+    value: "${n_samples}"
   - name: scala_dependency_1 
     value: "org.apache.spark:spark-sql_2.12:3.4.1"
   - name: scala_dependency_2 
@@ -138,15 +130,13 @@ extraEnvVars:
   - name: scala_dependency_3
     value: "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1"
   - name: KAFKA_SERVER_PORT
-    value: "kafka:29092"
+    value: "broker:29092"
   - name: MONGO_SERVER_PORT
     value: "mongo:27017"
-  - name: SPARK_MASTER_SERVER_PORT
-    value: "spark:7077"
   - name: MONGO_DBNAME
     value: stonks
-  - name: TWELVE_DATA_KEY
-    value: "YOUR SECRET API KEY"
+${yaml_symbol_string}
+
 ## @param extraEnvVarsCM ConfigMap with extra environment variables for all the Airflow pods
 ##
 extraEnvVarsCM: ""
@@ -309,7 +299,10 @@ web:
   ##
   resources:
     limits: {}
-    requests: {}
+    requests:
+      memory: "2048Mi"
+      cpu: "300m"
+      ephemeral-storage: "50Mi" 
   ## Configure Airflow web pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param web.podSecurityContext.enabled Enabled Airflow web pods' Security Context
@@ -520,7 +513,10 @@ scheduler:
   ##
   resources:
     limits: {}
-    requests: {}
+    requests:
+      memory: "512Mi"
+      cpu: "300m"
+      ephemeral-storage: "50Mi"
   ## Configure Airflow scheduler pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param scheduler.podSecurityContext.enabled Enabled Airflow scheduler pods' Security Context
@@ -778,7 +774,10 @@ worker:
   ##
   resources:
     limits: {}
-    requests: {}
+    requests:
+      memory: "2572Mi"
+      cpu: "1000m"
+      ephemeral-storage: "1024Mi"
   ## Configure Airflow worker pods Security Context
   ## ref: https://kubernetes.io/docs/tasks/configure-pod-container/security-context/#set-the-security-context-for-a-pod
   ## @param worker.podSecurityContext.enabled Enabled Airflow worker pods' Security Context
@@ -1030,7 +1029,11 @@ git:
     ## Clone init container resource requests and limits
     ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
     ##
-    resources: {}
+    resources:
+      requests:
+        memory: "128Mi"
+        cpu: "50m"
+        ephemeral-storage: "50Mi"
   ## Properties for the Sync sidecar container
   ## @param git.sync.interval Interval in seconds to pull the git repository containing the plugins and/or DAG files
   ## @param git.sync.command Override cmd
@@ -1052,7 +1055,11 @@ git:
     ## Sync sidecar container resource requests and limits
     ## ref: https://kubernetes.io/docs/user-guide/compute-resources/
     ##
-    resources: {}
+    resources:
+      requests:
+          memory: "128Mi"
+          cpu: "50m"
+          ephemeral-storage: "50Mi"
 
 ## @section Airflow ldap parameters
 
@@ -1502,7 +1509,7 @@ metrics:
 ## @param postgresql.architecture PostgreSQL architecture (`standalone` or `replication`)
 ##
 postgresql:
-  enabled: true
+  enabled: false
   auth:
     enablePostgresUser: true
     username: bn_airflow
@@ -1521,11 +1528,11 @@ postgresql:
 ## @param externalDatabase.existingSecretPasswordKey Name of an existing secret key containing the database credentials
 ##
 externalDatabase:
-  host: localhost
+  host: ${postgres_endpoint}
   port: 5432
-  user: bn_airflow
-  database: bitnami_airflow
-  password: ""
+  user: ${postgres_username}
+  database: ${postgres_db_name}
+  password: ${postgres_password}
   existingSecret: ""
   existingSecretPasswordKey: ""
 
@@ -1538,7 +1545,7 @@ externalDatabase:
 ## @param redis.architecture Redis&reg; architecture. Allowed values: `standalone` or `replication`
 ##
 redis:
-  enabled: true
+  enabled: false
   auth:
     enabled: true
     ## Redis&reg; password (both master and slave). Defaults to a random 10-character alphanumeric string if not set and auth.enabled is true.
@@ -1559,7 +1566,7 @@ redis:
 ## @param externalRedis.existingSecretPasswordKey Name of an existing secret key containing the Redis&trade credentials
 ##
 externalRedis:
-  host: localhost
+  host: ${redis_endpoint}
   port: 6379
   ## Most Redis&reg; implementations do not require a username
   ## to authenticate and it should be enough with the password
@@ -1578,30 +1585,5 @@ extraDeploy:
         twelvedata
         kafka-python
         pendulum
+        kubernetes
         apache-airflow-providers-apache-spark
-  - apiVersion: v1
-    kind: ConfigMap
-    metadata:
-      name: environment
-    data:
-      environment.py: |
-        TOPICS = ["msft"]  #["aapl", "btc"]
-        SYMBOLS = ["MSFT"] #["AAPL", "BTC/USD"]
-        N_SAMPLES = 5 ###395 #number of minutes in a trading day, plus 5 for good measure
-        spark_conn_name = "spark_default"
-
-        # these must match with the dependencies used to build your jar
-        scala_dependencies = ["org.apache.spark:spark-sql_2.12:3.4.1",
-                              "org.mongodb.spark:mongo-spark-connector_2.12:10.2.0",
-                              "org.apache.spark:spark-sql-kafka-0-10_2.12:3.4.1"]
-        
-        """
-        some example symbols: 
-
-        AAPL
-        MSFT
-        GOOGL
-        VFIAX
-        BTC/USD
-
-        """

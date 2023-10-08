@@ -1,0 +1,5 @@
+apache-airflow-providers-apache-spark
+apache-airflow-providers-ssh
+twelvedata
+kafka-python
+pendulum
